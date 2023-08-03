@@ -14,16 +14,54 @@ class YandexDiskService {
             const formData = new FormData();
             formData.append('file', file);
             axios.put(href, formData);
+
+            return ({
+                succsess: true,
+                error: null
+            })
         } catch (error) {
             console.error('Failed to upload file', error)
+
+            if (error.code === "ERR_NETWORK") {
+                return ({
+                    succsess: false,
+                    error: `Проверьте подключение к интернету!`
+                })
+            }
+
+            return ({
+                succsess: false,
+                error: `${error.response.data.message}`
+            })
         }
     };
     
     static async uploadFiles(files, token) {
         try {
-            files.forEach(file => this.uploadFile(token, `app:/${file.name}`, file))
+            for (let i = 0; i < files.length; i++) {
+                let res = await this.uploadFile(token, `app:/${files[i].name}`, files[i])
+                
+                if (res.error) return res
+            }
+            
+            return ({
+                succsess: true,
+                error: null
+            })
         } catch (error) {
             console.error(`Failed to upload files`, error)
+
+            if (error.code === "ERR_NETWORK") {
+                return ({
+                    succsess: false,
+                    error: `Проверьте подключение к интернету!`
+                })
+            }
+
+            return ({
+                succsess: false,
+                error: `${error.response.data.message}`
+            })
         }
     }
 }
